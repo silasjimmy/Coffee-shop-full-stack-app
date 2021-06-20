@@ -17,7 +17,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -28,6 +28,15 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks")
+def get_drinks():
+    drinks_query = Drink.query.all()
+    drinks = [drink.short() for drink in drinks_query]
+
+    return jsonify({
+        "success": True,
+        "drinks": drinks
+    }), 200
 
 
 '''
@@ -38,6 +47,9 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks-detail")
+def get_drinks_detail():
+    pass
 
 
 '''
@@ -49,6 +61,11 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks", methods=['POST'])
+def add_drink():
+    drink_details = request.get_json()
+    pass
+    # return drink_details
 
 
 '''
@@ -62,6 +79,10 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks/<int:drink_id>", methods=['PATCH'])
+def update_drink(drink_id):
+    drink = Drink.query.get(id=drink_id).one_or_none()
+    pass
 
 
 '''
@@ -74,6 +95,10 @@ CORS(app)
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks/<int:drink_id>")
+def delete_drink(drink_id):
+    drink = Drink.query.get(id=drink_id).one_or_none()
+    pass
 
 
 # Error Handling
@@ -106,6 +131,13 @@ def unprocessable(error):
 @TODO implement error handler for 404
     error handler should conform to general task above
 '''
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "Not found"
+    }), 404
 
 
 '''
