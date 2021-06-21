@@ -122,7 +122,7 @@ def delete_drink(payload, drink_id):
             "success": True,
             "delete": drink_id
         }), 200
-    except Exception as e:
+    except Exception:
         abort(404)
 
 
@@ -165,4 +165,4 @@ def unauthorized_error(error):
         "success": False,
         "error": error.status_code,
         "message": error.error
-    }), 401
+    }), error.status_code
