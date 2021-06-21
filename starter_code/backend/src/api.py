@@ -86,7 +86,10 @@ def update_drink(payload, drink_id):
     drink = Drink.query.filter(Drink.id==drink_id).one_or_none()
 
     if not drink:
-        abort(404)
+         return json.dumps({
+                "success": False,
+                "error": 'Drink #' + drink_id + ' not found to be edited'
+            }), 404
 
     try:
         if data.get('title', None):
@@ -110,7 +113,7 @@ def delete_drink(payload, drink_id):
     '''
     Handles DELETE requests to delete a drink record.
     '''
-    
+
     try:
         drink = Drink.query.filter(Drink.id==drink_id).one_or_none()
         drink.delete()
