@@ -52,7 +52,7 @@ def get_drinks():
 '''
 @app.route("/drinks-detail")
 @requires_auth('get:drinks-detail')
-def get_drinks_detail():
+def get_drinks_detail(payload):
     try:
         drinks_query = Drink.query.all()
         drinks = [drink.long() for drink in drinks_query]
@@ -76,13 +76,13 @@ def get_drinks_detail():
 '''
 @app.route("/drinks", methods=['POST'])
 @requires_auth('post:drinks')
-def add_drink():
+def add_drink(payload):
     data = request.get_json()
 
     try:
         new_drink = Drink(
             title=data.get('title'),
-            recipe=data.get('recipe')
+            recipe=json.dumps(data.get('recipe'))
         )
 
         new_drink.insert()
@@ -108,7 +108,7 @@ def add_drink():
 '''
 @app.route("/drinks/<int:drink_id>", methods=['PATCH'])
 @requires_auth('patch:drinks')
-def update_drink(drink_id):
+def update_drink(payload, drink_id):
     data = request.get_json()
     drink = Drink.query.filter(Drink.id==drink_id).one_or_none()
 
@@ -120,13 +120,13 @@ def update_drink(drink_id):
             drink.title = data.get('title')
 
         if data.get('recipe', None):
-            drink.recipe = data.get('recipe')
+            drink.recipe = json.dumps(data.get('recipe'))
 
         drink.update()
 
         return jsonify({
             "success": True,
-            "drinks": drink.long()
+            "drinks": [drink.long()]
         }), 200
     except Exception:
         abort(422)
@@ -144,7 +144,7 @@ def update_drink(drink_id):
 '''
 @app.route("/drinks/<int:drink_id>", methods=["DELETE"])
 @requires_auth('delete:drinks')
-def delete_drink(drink_id):
+def delete_drink(payload, drink_id):
     try:
         drink = Drink.query.filter(Drink.id==drink_id).one_or_none()
         drink.delete()
