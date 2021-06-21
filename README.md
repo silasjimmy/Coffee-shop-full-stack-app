@@ -1,2 +1,2 @@
-# Coffee-shop-full-stack-app
-A coffee shop web app made as a project provided in Udacity's Full Stack Web Development Nanodegree program
+# Coffee shop full stack app
+A web app to crate coffee drinks. Access to content and actions is restricted based on the type of user. The project is aimed to practice implementing authentication and authorization in web applications using [Auth0](https://auth0.com/).
