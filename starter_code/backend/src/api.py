@@ -75,7 +75,7 @@ def get_drinks_detail():
         or appropriate status code indicating reason for failure
 '''
 @app.route("/drinks", methods=['POST'])
-# @requires_auth('post:drinks')
+@requires_auth('post:drinks')
 def add_drink():
     data = request.get_json()
 
@@ -107,10 +107,29 @@ def add_drink():
         or appropriate status code indicating reason for failure
 '''
 @app.route("/drinks/<int:drink_id>", methods=['PATCH'])
-# @requires_auth('patch:drinks')
+@requires_auth('patch:drinks')
 def update_drink(drink_id):
-    drink = Drink.query.get(id=drink_id).one_or_none()
-    pass
+    data = request.get_json()
+    drink = Drink.query.filter(Drink.id==drink_id).one_or_none()
+
+    if not drink:
+        abort(404)
+
+    try:
+        if data.get('title', None):
+            drink.title = data.get('title')
+
+        if data.get('recipe', None):
+            drink.recipe = data.get('recipe')
+
+        drink.update()
+
+        return jsonify({
+            "success": True,
+            "drinks": drink.long()
+        }), 200
+    except Exception:
+        abort(422)
 
 
 '''
@@ -139,9 +158,6 @@ def delete_drink(drink_id):
 
 
 # Error Handling
-'''
-Example error handling for unprocessable entity
-'''
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
@@ -150,17 +166,6 @@ def unprocessable(error):
         "message": "unprocessable"
     }), 422
 
-
-'''
-@TODO implement error handlers using the @app.errorhandler(error) decorator
-    each error handler should return (with approprate messages):
-             jsonify({
-                    "success": False,
-                    "error": 404,
-                    "message": "resource not found"
-                    }), 404
-
-'''
 @app.errorhandler(500)
 def internal_server_error(error):
     return jsonify({
@@ -177,10 +182,6 @@ def bad_request_error(error):
         'message': "Bad request error"
     }), 400
 
-'''
-@TODO implement error handler for 404
-    error handler should conform to general task above
-'''
 @app.errorhandler(404)
 def not_found_error(error):
     return jsonify({
@@ -189,8 +190,10 @@ def not_found_error(error):
         "message": "Not found"
     }), 404
 
-
-'''
-@TODO implement error handler for AuthError
-    error handler should conform to general task above
-'''
+@app.errorhandler(AuthError)
+def unauthorized_error(error):
+    return jsonify({
+        "success": False,
+        "error": error.status_code,
+        "message": error.error
+    }), 401
