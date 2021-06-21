@@ -30,13 +30,16 @@ db_drop_and_create_all()
 '''
 @app.route("/drinks")
 def get_drinks():
-    drinks_query = Drink.query.all()
-    drinks = [drink.short() for drink in drinks_query]
+    try:
+        drinks_query = Drink.query.all()
+        drinks = [drink.short() for drink in drinks_query]
 
-    return jsonify({
-        "success": True,
-        "drinks": drinks
-    }), 200
+        return jsonify({
+            "success": True,
+            "drinks": drinks
+        }), 200
+    except Exception as e:
+        abort(422)
 
 
 '''
@@ -83,13 +86,13 @@ def add_drink():
         )
 
         new_drink.insert()
+
+        return jsonify({
+            'success': True,
+            'drinks': new_drink.long()
+        }), 200
     except Exception:
         abort(422)
-
-    return jsonify({
-        'success': True,
-        'drinks': new_drink.long()
-    })
 
 
 '''
@@ -130,7 +133,7 @@ def delete_drink(drink_id):
         return jsonify({
             "success": True,
             "delete": drink_id
-        })
+        }), 200
     except Exception as e:
         abort(404)
 
@@ -158,6 +161,21 @@ def unprocessable(error):
                     }), 404
 
 '''
+@app.errorhandler(500)
+def internal_server_error(error):
+    return jsonify({
+        'success': False,
+        'error': 500,
+        'message': "Internal server error"
+    }), 500
+
+@app.errorhandler(400)
+def bad_request_error(error):
+    return jsonify({
+        'success': False,
+        'error': 400,
+        'message': "Bad request error"
+    }), 400
 
 '''
 @TODO implement error handler for 404
